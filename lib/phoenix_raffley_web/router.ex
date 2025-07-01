@@ -8,10 +8,18 @@ defmodule PhoenixRaffleyWeb.Router do
     plug :put_root_layout, html: {PhoenixRaffleyWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :spy
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  def spy(conn, _opts) do
+    greeting = ~w(Hi Howdy Hellow) |> Enum.random()
+    conn = assign(conn, :greeting, greeting)
+    # IO.inspect(conn, label: "Request Details")
+    conn
   end
 
   scope "/", PhoenixRaffleyWeb do
@@ -21,9 +29,9 @@ defmodule PhoenixRaffleyWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", PhoenixRaffleyWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", PhoenixRaffleyWeb do
+    pipe_through :api
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:phoenix_raffley, :dev_routes) do
