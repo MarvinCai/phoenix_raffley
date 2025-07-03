@@ -1,0 +1,19 @@
+<div class="rules">
+    <h1> The Rule </h1>
+
+    <%= Enum.random(1..10) %>
+
+    <p>
+    <%= @emoji %>
+    </p>
+
+    <ol>
+        <%= for rule <- @rules do %>
+            <li><%= rule.text %></li>
+        <% end %>
+    </ol>
+
+    <pre> 
+        <%= inspect(@conn, pretty: true) %>
+    </pre>
+</div>
