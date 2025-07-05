@@ -26,7 +26,8 @@ defmodule PhoenixRaffleyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/rule", RuleController, :index
+    get "/rules", RuleController, :index
+    get "/rules/:id", RuleController, :show
   end
 
   # Other scopes may use custom stacks.

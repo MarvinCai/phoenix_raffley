@@ -11,4 +11,10 @@ defmodule PhoenixRaffleyWeb.RuleController do
     rules = Rule.list_rules()
     render(conn, :index, emoji: emojis, rules: rules)
   end
+
+  def show(conn, %{"id" => id}) do
+    rule = Rule.get_rule(id)
+
+    render(conn, :show, rule: rule)
+  end
 end
