@@ -2,6 +2,10 @@ defmodule PhoenixRaffleyWeb.EstimatorLive do
   use PhoenixRaffleyWeb, :live_view
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Process.send_after(self(), :tick, 2000)
+    end
+
     socket = assign(socket, tickets: 0, price: 3)
 
     IO.inspect(self(), label: "Mount")
@@ -31,6 +35,11 @@ defmodule PhoenixRaffleyWeb.EstimatorLive do
             <%= @tickets * @price %>
           </div>
         </section>
+
+        <form phx-submit="set-price">
+            <label> Ticket Price: $</label>
+            <input type="number" name="price" value={@price} />
+        </form>
       </div>
     """
   end
@@ -43,4 +52,14 @@ defmodule PhoenixRaffleyWeb.EstimatorLive do
     {:noreply, socket}
   end
 
+  def handle_event("set-price", %{"price" => price}, socket) do
+    socket = assign(socket, :price, String.to_integer(price))
+    {:noreply, socket}
+  end
+
+  def handle_info(:tick, socket) do
+    Process.send_after(self(), :tick, 2000)
+
+    {:noreply, update(socket, :tickets, &(&1 + 10))}
+  end
 end
