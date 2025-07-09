@@ -6,10 +6,11 @@ defmodule PhoenixRaffleyWeb.EstimatorLive do
       Process.send_after(self(), :tick, 2000)
     end
 
-    socket = assign(socket, tickets: 0, price: 3)
+    socket = assign(socket, tickets: 0, price: 3, page_title: "Raffle Estimator")
 
     IO.inspect(self(), label: "Mount")
 
+    #{:ok, socket, layout: {PhoenixRaffleyWeb.Layouts, :simple}}
     {:ok, socket}
   end
 
