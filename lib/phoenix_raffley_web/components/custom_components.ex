@@ -1,19 +1,22 @@
 defmodule PhoenixRaffleyWeb.CustomComponents do
   use PhoenixRaffleyWeb, :html
+  alias PhoenixRaffley.Raffles.Raffle
 
-  attr :raffle, PhoenixRaffley.Raffle, required: true
+  attr :raffle, Raffle, required: true
   def render_raffle_card(assigns) do
     ~H"""
-    <div class="card">
-      <img src={@raffle.image_path} />
-      <h2><%= @raffle.prize %></h2>
-      <div class="details">
-        <div class="price">
-          <%= "$#{@raffle.ticket_price}" %>
+    <.link navigate={~p"/raffles/#{@raffle.id}"}>
+      <div class="card">
+        <img src={@raffle.image_path} />
+        <h2>{@raffle.prize}</h2>
+        <div class="details">
+          <div class="price">
+            {}"$#{@raffle.ticket_price}"}
+          </div>
+          <.render_badge status={@raffle.status} />
         </div>
-        <.render_badge status={@raffle.status} />
       </div>
-    </div>
+    </.link>
     """
   end
 

@@ -31,7 +31,8 @@ defmodule PhoenixRaffleyWeb.Router do
 
     live "/", RaffleLive.Index
     live "/estimator", EstimatorLive
-    live "/raffle", RaffleLive.Index
+    live "/raffles", RaffleLive.Index
+    live "/raffles/:id", RaffleLive.Show
   end
 
   # Other scopes may use custom stacks.
