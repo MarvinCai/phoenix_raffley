@@ -8,9 +8,9 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
     {:ok, socket}
   end
 
-  def handle_params(%{"id" => id}, uri, socket) do
+  def handle_params(%{"id" => id}, _uri, socket) do
     IO.inspect(self(), label: "Handle Params")
-    raffle = Raffles.get_raffle(id)
+    raffle = Raffles.get_raffle!(id)
     socket =
       socket
       |> assign(raffle: raffle)

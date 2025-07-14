@@ -11,7 +11,7 @@ defmodule PhoenixRaffleyWeb.CustomComponents do
         <h2>{@raffle.prize}</h2>
         <div class="details">
           <div class="price">
-            {}"$#{@raffle.ticket_price}"}
+            {"$#{@raffle.ticket_price}"}
           </div>
           <.render_badge status={@raffle.status} />
         </div>
