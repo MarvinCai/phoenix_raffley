@@ -3,9 +3,10 @@ defmodule PhoenixRaffleyWeb.CustomComponents do
   alias PhoenixRaffley.Raffles.Raffle
 
   attr :raffle, Raffle, required: true
+  attr :id, :string, required: true
   def render_raffle_card(assigns) do
     ~H"""
-    <.link navigate={~p"/raffles/#{@raffle.id}"}>
+    <.link navigate={~p"/raffles/#{@raffle.id}"} id={@id}>
       <div class="card">
         <img src={@raffle.image_path} />
         <h2>{@raffle.prize}</h2>
