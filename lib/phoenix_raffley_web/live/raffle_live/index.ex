@@ -5,23 +5,24 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Index do
   alias PhoenixRaffleyWeb.CustomComponents, as: Components
 
   def mount(_params, _session, socket) do
+    IO.inspect(self(), label: "Mount")
+    {:ok, socket }
+  end
+
+  def handle_params(params, uri, socket) do
+    IO.inspect(self(), label: "Handle Params")
+
     socket =
       socket
-        |> stream(:raffles, Raffles.list_raffles())
-        |> assign([form: to_form(%{}), page_title: "Raffley"])
+        |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+        |> assign([form: to_form(params), page_title: "Raffley"])
 
-    # IO.inspect(socket.assigns.streams.raffles, label: "MOUNT")
-
-    # socket = attach_hook(socket, :post_mount, :after_render, fn socket ->
-    #   IO.inspect(socket.assigns.streams.raffles, label: "AFTER RENDER")
-    #   socket
-
-    # end)
-    {:ok, socket }
+    {:noreply, socket}
   end
 
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
+    IO.inspect(self(), label: "Render")
     ~H"""
     <div class="raffle-index">
       <Components.render_banner :if={false}>
@@ -54,15 +55,22 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Index do
           "Price: High to low": "ticket_price_desc",
           "Price: Low to high": "ticket_price_asc"
           ]} prompt="Sort By" />
+
+        <.link patch={~p"/raffles"} >
+          Reset
+        </.link>
       </.form>
     """
   end
 
   def handle_event("filter", params, socket) do
-    socket =
-      socket
-      |> assign(form: to_form(params))
-      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+    params =
+      params
+      |> Map.take(~w(q status sort_by))
+      |> Map.reject(fn {_, v} -> v == "" end)
+
+    IO.inspect(params, label: "Filter Params")
+      socket = push_patch(socket, to: ~p"/raffles?#{params}")
     {:noreply, socket}
   end
 end
