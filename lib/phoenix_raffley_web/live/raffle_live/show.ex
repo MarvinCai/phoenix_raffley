@@ -8,6 +8,7 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
     {:ok, socket}
   end
 
+  @spec handle_params(map(), any(), any()) :: {:noreply, map()}
   def handle_params(%{"id" => id}, _uri, socket) do
     IO.inspect(self(), label: "Handle Params")
     raffle = Raffles.get_raffle!(id)
@@ -15,13 +16,18 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
       socket
       |> assign(raffle: raffle)
       |> assign(:page_title, raffle.prize)
-      |> assign(:featured_raffle, Raffles.featured_raffles(raffle))
+      |> assign_async(:featured_raffle, fn ->
+        {:ok, %{featured_raffle: Raffles.featured_raffles(raffle)}}
+      end)
     {:noreply, socket}
   end
 
   def render(assigns) do
     IO.inspect(self(), label: "Render")
     ~H"""
+      <pre :if={false}>
+        {inspect(@featured_raffle, pretty: true)})}
+      </pre>
       <div class="raffle-show">
         <div class="raffle">
           <img src={@raffle.image_path} />
@@ -53,13 +59,20 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
     ~H"""
     <section>
       <h4> Featured Raffles</h4>
-      <ul class="raffles">
-        <li :for={raffle <- @raffles}>
-          <.link navigate={~p"/raffles/#{raffle.id}"}>
-            <img src={raffle.image_path}> {raffle.prize}
-          </.link>
-        </li>
-      </ul>
+      <.async_result :let={result} assign={@raffles}>
+        <:loading>
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
+        </:loading>
+        <ul class="raffles">
+          <li :for={raffle <- result}>
+            <.link navigate={~p"/raffles/#{raffle.id}"}>
+              <img src={raffle.image_path}> {raffle.prize}
+            </.link>
+          </li>
+        </ul>
+      </.async_result>
     </section>
     """
   end
