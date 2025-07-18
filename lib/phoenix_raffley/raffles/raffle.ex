@@ -15,7 +15,9 @@ defmodule PhoenixRaffley.Raffles.Raffle do
   @doc false
   def changeset(raffle, attrs) do
     raffle
-    |> cast(attrs, [:prize, :description, :ticket_prize, :status, :image_path])
-    |> validate_required([:prize, :description, :ticket_prize, :status, :image_path])
+    |> cast(attrs, [:prize, :description, :ticket_price, :status, :image_path])
+    |> validate_required([:prize, :description, :ticket_price, :status, :image_path])
+    |> validate_length(:description, min: 10)
+    |> validate_number(:ticket_price, greater_than: 0)
   end
 end

@@ -51,8 +51,6 @@ defmodule PhoenixRaffley.Raffles do
   end
 
   def featured_raffles(raffle) do
-    Process.sleep(2000)
-
     from(Raffle)
     |> where(status: :open)
     |> where([r], r.id != ^raffle.id)
