@@ -37,6 +37,11 @@ defmodule PhoenixRaffley.Charities do
   """
   def get_charity!(id), do: Repo.get!(Charity, id)
 
+  def get_charity_with_raffles!(id) do
+     Repo.get!(Charity, id)
+     |> Repo.preload(:raffles)
+  end
+
   @doc """
   Creates a charity.
 
@@ -100,5 +105,19 @@ defmodule PhoenixRaffley.Charities do
   """
   def change_charity(%Charity{} = charity, attrs \\ %{}) do
     Charity.changeset(charity, attrs)
+  end
+
+  def all_charity_names_and_ids do
+    from(Charity)
+    |> select([c], {c.name, c.id})
+    |> order_by(:id)
+    |> Repo.all()
+  end
+
+  def all_charity_names_and_slugs do
+    from(Charity)
+    |> select([c], {c.name, c.slug})
+    |> order_by(:id)
+    |> Repo.all()
   end
 end

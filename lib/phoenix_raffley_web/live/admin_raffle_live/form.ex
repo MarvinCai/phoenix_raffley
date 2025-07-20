@@ -1,10 +1,15 @@
 defmodule PhoenixRaffleyWeb.AdminRaffleLive.Form do
   alias PhoenixRaffley.RaffleAdmin
   alias PhoenixRaffley.Raffles.Raffle
+  alias PhoenixRaffley.Charities
   use PhoenixRaffleyWeb, :live_view
 
   def mount(params, _session, socket) do
-    {:ok, apply_action(socket, socket.assigns.live_action, params)}
+    socket =
+      socket
+      |> assign(:charity_options, Charities.all_charity_names_and_ids())
+      |> apply_action(socket.assigns.live_action, params)
+    {:ok, socket}
   end
 
   defp apply_action(socket, :new, _params) do
@@ -41,6 +46,9 @@ defmodule PhoenixRaffleyWeb.AdminRaffleLive.Form do
 
         <.input field={@form[:status]} type="select" label="Status"
         options={["upcoming", "open", "closed"]} prompt="Select Status" />
+
+        <.input field={@form[:charity_id]} type="select" label="Charity"
+        options={@charity_options} prompt="Choose a charity" />
 
         <.input field={@form[:image_path]} label="Image Path"/>
 

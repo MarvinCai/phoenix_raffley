@@ -8,6 +8,9 @@ defmodule PhoenixRaffleyWeb.CustomComponents do
     ~H"""
     <.link navigate={~p"/raffles/#{@raffle.id}"} id={@id}>
       <div class="card">
+        <div class="charity">
+          {@raffle.charity.name}
+        </div>
         <img src={@raffle.image_path} />
         <h2>{@raffle.prize}</h2>
         <div class="details">

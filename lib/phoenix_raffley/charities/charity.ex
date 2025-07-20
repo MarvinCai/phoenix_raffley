@@ -6,6 +6,8 @@ defmodule PhoenixRaffley.Charities.Charity do
     field :name, :string
     field :slug, :string
 
+    has_many :raffles, PhoenixRaffley.Raffles.Raffle
+
     timestamps(type: :utc_datetime)
   end
 
