@@ -38,7 +38,7 @@ defmodule PhoenixRaffleyWeb.Router do
     live "/admin/raffles/new", AdminRaffleLive.Form, :new
     live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
 
-     live "/charities", CharityLive.Index, :index
+    live "/charities", CharityLive.Index, :index
     live "/charities/new", CharityLive.Index, :new
     live "/charities/:id/edit", CharityLive.Index, :edit
 
@@ -47,8 +47,12 @@ defmodule PhoenixRaffleyWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  scope "/api", PhoenixRaffleyWeb do
+  scope "/api", PhoenixRaffleyWeb.Api do
     pipe_through :api
+
+    get "/raffles", RaffleController, :index
+    get "/raffles/:id", RaffleController, :show
+    post "/raffles", RaffleController, :create
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
