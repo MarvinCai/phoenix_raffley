@@ -21,7 +21,6 @@ defmodule PhoenixRaffleyWeb.Router do
   def spy(conn, _opts) do
     greeting = ~w(Hi Howdy Hellow) |> Enum.random()
     conn = assign(conn, :greeting, greeting)
-    IO.inspect(conn, label: "Request Details")
     conn
   end
 
@@ -38,17 +37,24 @@ defmodule PhoenixRaffleyWeb.Router do
   end
 
   scope "/", PhoenixRaffleyWeb do
-    pipe_through [:browser, :require_authenticated_user]
-    live "/admin/raffles", AdminRaffleLive.Index
-    live "/admin/raffles/new", AdminRaffleLive.Form, :new
-    live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
+    pipe_through [:browser, :require_authenticated_user, :require_admin]
 
-    live "/charities", CharityLive.Index, :index
-    live "/charities/new", CharityLive.Index, :new
-    live "/charities/:id/edit", CharityLive.Index, :edit
+    live_session :admin,
+      on_mount: [
+        {PhoenixRaffleyWeb.UserAuth, :ensure_authenticated},
+        {PhoenixRaffleyWeb.UserAuth, :ensure_admin}
+        ] do
+      live "/admin/raffles", AdminRaffleLive.Index
+      live "/admin/raffles/new", AdminRaffleLive.Form, :new
+      live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
 
-    live "/charities/:id", CharityLive.Show, :show
-    live "/charities/:id/show/edit", CharityLive.Show, :edit
+      live "/charities", CharityLive.Index, :index
+      live "/charities/new", CharityLive.Index, :new
+      live "/charities/:id/edit", CharityLive.Index, :edit
+
+      live "/charities/:id", CharityLive.Show, :show
+      live "/charities/:id/show/edit", CharityLive.Show, :edit
+    end
   end
 
   # Other scopes may use custom stacks.

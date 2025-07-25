@@ -26,7 +26,6 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Index do
     {:noreply, socket}
   end
 
-  @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     IO.inspect(self(), label: "Render")
     ~H"""

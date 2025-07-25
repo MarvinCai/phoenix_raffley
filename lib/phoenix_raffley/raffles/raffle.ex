@@ -10,7 +10,7 @@ defmodule PhoenixRaffley.Raffles.Raffle do
     field :image_path, :string, default: "/images/placeholder.jpg"
 
     belongs_to :charity, PhoenixRaffley.Charities.Charity
-
+    has_many :tickets, PhoenixRaffley.Tickets.Ticket
     timestamps(type: :utc_datetime)
   end
 

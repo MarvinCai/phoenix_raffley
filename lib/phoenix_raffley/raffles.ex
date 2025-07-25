@@ -1,15 +1,25 @@
 defmodule PhoenixRaffley.Raffles do
   alias PhoenixRaffley.Repo
   alias PhoenixRaffley.Raffles.Raffle
+  alias PhoenixRaffley.Tickets.Ticket
   alias PhoenixRaffley.Charities.Charity
   import Ecto.Query
   def list_raffles() do
     Repo.all(Raffle)
   end
 
+  @spec get_raffle!(any()) :: nil | [%{optional(atom()) => any()}] | %{optional(atom()) => any()}
   def get_raffle!(id) do
     Repo.get!(Raffle, id)
     |> Repo.preload(:charity)
+  end
+
+  def list_tickets(raffle) do
+    raffle
+    |> Ecto.assoc(:tickets)
+    |> preload(:user)
+    |> order_by(desc: :inserted_at)
+    |> Repo.all()
   end
 
   def filter_raffles(filter) do

@@ -19,7 +19,7 @@ defmodule PhoenixRaffleyWeb.AdminRaffleLive.Index do
           Toggle Joke
         </.button>
         <div id="joke" class="joke">
-          What's a tres's favorite drink?
+          What's a tres's favorite drink, {@current_user.username}?
         </div>
         <.header>
           {@page_title}
