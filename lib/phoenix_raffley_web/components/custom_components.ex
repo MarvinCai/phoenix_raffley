@@ -40,14 +40,15 @@ defmodule PhoenixRaffleyWeb.CustomComponents do
     """
   end
 
-  slot :myslot, required: true
+  slot :detail
   slot :details
   @spec render_banner(map()) :: Phoenix.LiveView.Rendered.t()
   def render_banner(assigns) do
     assigns = assign(assigns, :emoji, ~w(🎉 🥳 🎊 ✨ ⚡️ 🔥 🌈 🎉 🥳 🎊 ✨ ⚡️ 🔥 🌈) |> Enum.random())
     ~H"""
     <div class="banner">
-      {render_slot(@myslot, @emoji)}
+      {render_slot(@inner_block)}
+      {render_slot(@detail, @emoji)}
       <div :if={@details != []} class="details">
         {render_slot(@details)}
       </div>

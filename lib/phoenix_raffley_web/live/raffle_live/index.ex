@@ -30,13 +30,13 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Index do
     IO.inspect(self(), label: "Render")
     ~H"""
     <div class="raffle-index">
-      <Components.render_banner :if={false}>
-        <:myslot :let={emoji}>
+      <Components.render_banner>
+        <:detail :let={emoji}>
           <h1>
             <.icon name="hero-sparkles-solid" />
             Mystery Raffle Coming Soon! <%= emoji %>
           </h1>
-        </:myslot>
+        </:detail>
         <:details>
           To be revealed tomorrow! Stay tuned for the big surprise!
         </:details>

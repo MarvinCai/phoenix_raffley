@@ -1,17 +1,24 @@
 defmodule PhoenixRaffley.Raffles do
   alias PhoenixRaffley.Repo
   alias PhoenixRaffley.Raffles.Raffle
-  alias PhoenixRaffley.Tickets.Ticket
   alias PhoenixRaffley.Charities.Charity
   import Ecto.Query
+
+  def subscribe(raffle_id)  do
+    Phoenix.PubSub.subscribe(PhoenixRaffley.PubSub, "raffle:#{raffle_id}")
+  end
+
+  def broadcast(raffle_id, message) do
+    Phoenix.PubSub.broadcast(PhoenixRaffley.PubSub, "raffle:#{raffle_id}", message)
+  end
+
   def list_raffles() do
     Repo.all(Raffle)
   end
 
-  @spec get_raffle!(any()) :: nil | [%{optional(atom()) => any()}] | %{optional(atom()) => any()}
   def get_raffle!(id) do
     Repo.get!(Raffle, id)
-    |> Repo.preload(:charity)
+    |> Repo.preload([:charity, :winning_ticket])
   end
 
   def list_tickets(raffle) do

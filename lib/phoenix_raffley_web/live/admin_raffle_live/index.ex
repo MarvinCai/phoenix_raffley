@@ -46,6 +46,10 @@ defmodule PhoenixRaffleyWeb.AdminRaffleLive.Index do
             {"$#{raffle.ticket_price}"}
           </:col>
 
+          <:col :let={{_dom_id, raffle}} label="Winning Ticket #">
+            {"#{raffle.winning_ticket_id}"}
+          </:col>
+
           <:action :let={{_dom_id, raffle}}>
             <.link navigate={~p"/admin/raffles/#{raffle.id}/edit"}>
               Edit
@@ -55,6 +59,12 @@ defmodule PhoenixRaffleyWeb.AdminRaffleLive.Index do
           <:action :let={{dom_id, raffle}}>
             <.link phx-click={deletet_and_hide(dom_id, raffle)} phx-disable-with="Deleting..." data-confirm="Are you sure?">
               Delete
+            </.link>
+          </:action>
+
+          <:action :let={{_dom_id, raffle}}>
+            <.link phx-click="draw_a_winner" phx-value-id={raffle.id}>
+              Draw Winner
             </.link>
           </:action>
         </.table>
@@ -69,6 +79,20 @@ defmodule PhoenixRaffleyWeb.AdminRaffleLive.Index do
     Process.sleep(2000)
 
     {:noreply, stream_delete(socket, :raffles, raffle)}
+  end
+
+  def handle_event("draw_a_winner", %{"id" => id}, socket) do
+    raffle = RaffleAdmin.get_raffle!(id)
+    case RaffleAdmin.draw_winner(raffle) do
+      {:ok, raffle} ->
+        socket =
+          socket
+          |> put_flash(:info, "Winner drawn!")
+          |> stream_insert(:raffles, raffle)
+        {:noreply, socket}
+      {:error, error} ->
+        {:noreply, put_flash(socket, :error, error)}
+    end
   end
 
   def deletet_and_hide(dom_id, raffle) do

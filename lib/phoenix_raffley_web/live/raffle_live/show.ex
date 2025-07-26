@@ -3,7 +3,7 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
   alias PhoenixRaffley.Raffles
   alias PhoenixRaffley.Tickets
   alias PhoenixRaffley.Tickets.Ticket
-  import PhoenixRaffleyWeb.CustomComponents
+  alias PhoenixRaffleyWeb.CustomComponents, as: Components
 
   on_mount {PhoenixRaffleyWeb.UserAuth, :mount_current_user}
   def mount(_params, _session, socket) do
@@ -15,6 +15,9 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
 
   def handle_params(%{"id" => id}, _uri, socket) do
     IO.inspect(self(), label: "Handle Params")
+    if connected?(socket) do
+      Raffles.subscribe(id)
+    end
     raffle = Raffles.get_raffle!(id)
     tickets = Raffles.list_tickets(raffle)
     socket =
@@ -34,10 +37,19 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
     IO.inspect(self(), label: "Render")
     ~H"""
       <div class="raffle-show">
+      <Components.render_banner :if={@raffle.winning_ticket_id}>
+        <h1>
+        <.icon name="hero-sparkles-solid" />
+        Ticket #{@raffle.winning_ticket_id} Wins!
+        </h1>
+        <:details>
+          {@raffle.winning_ticket.comment}
+        </:details>
+      </Components.render_banner>
         <div class="raffle">
           <img src={@raffle.image_path} />
           <section>
-            <.render_badge status={@raffle.status} />
+            <Components.render_badge status={@raffle.status} />
             <header>
             <div>
               <h2>{@raffle.prize}</h2>
@@ -149,9 +161,6 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
           socket =
             socket
             |> assign(:form, to_form(Tickets.change_ticket(%Ticket{})))
-            |> update(:ticket_count, &(&1 + 1))
-            |> update(:ticket_sum, &(&1 + ticket.price))
-            |> stream_insert(:tickets, ticket, at: 0)
 
           {:noreply, socket}
         {:error, changeset} ->
@@ -161,5 +170,19 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
 
           {:noreply, socket}
       end
+  end
+
+  def handle_info({:ticket_created, ticket}, socket) do
+    socket =
+      socket
+      |> update(:ticket_count, &(&1 + 1))
+      |> update(:ticket_sum, &(&1 + ticket.price))
+      |> stream_insert(:tickets, ticket, at: 0)
+
+     {:noreply, socket}
+  end
+
+  def handle_info({:raffle_updated, raffle}, socket) do
+     {:noreply, assign(socket, raffle: raffle)}
   end
 end
