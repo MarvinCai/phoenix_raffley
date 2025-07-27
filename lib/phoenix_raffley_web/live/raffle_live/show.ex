@@ -3,9 +3,11 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
   alias PhoenixRaffley.Raffles
   alias PhoenixRaffley.Tickets
   alias PhoenixRaffley.Tickets.Ticket
+  alias PhoenixRaffleyWeb.Presence
   alias PhoenixRaffleyWeb.CustomComponents, as: Components
 
   on_mount {PhoenixRaffleyWeb.UserAuth, :mount_current_user}
+
   def mount(_params, _session, socket) do
     IO.inspect(self(), label: "Mount")
     changeset = Tickets.change_ticket(%Ticket{})
@@ -15,15 +17,32 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
 
   def handle_params(%{"id" => id}, _uri, socket) do
     IO.inspect(self(), label: "Handle Params")
+
     if connected?(socket) do
       Raffles.subscribe(id)
+      %{current_user: current_user} = socket.assigns
+
+      if current_user do
+        {:ok, _} = Presence.track(self(), topic(id), current_user.username, %{
+          online_at: System.system_time(:second)
+        })
+
+        Phoenix.PubSub.subscribe(PhoenixRaffley.PubSub, "updates:" <> topic(id))
+      end
     end
+
+    presences = Presence.list(topic(id))
+      |> Enum.map(fn {username, %{metas: metas}} ->
+        %{id: username, metas: metas}
+      end)
+
     raffle = Raffles.get_raffle!(id)
     tickets = Raffles.list_tickets(raffle)
     socket =
       socket
       |> assign(raffle: raffle)
       |> stream(:tickets, tickets)
+      |> stream(:presences, presences)
       |> assign(:ticket_count, Enum.count(tickets))
       |> assign(:ticket_sum, Enum.sum_by(tickets, & &1.price))
       |> assign(:page_title, raffle.prize)
@@ -32,6 +51,8 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
       end)
     {:noreply, socket}
   end
+
+  defp topic(id), do: "raffle_wathers:#{id}"
 
   def render(assigns) do
     IO.inspect(self(), label: "Render")
@@ -91,6 +112,8 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
           </div>
           <div class="right">
             <.feature_raffles raffles={@featured_raffle} />
+
+            <.raffle_watchers :if={@current_user} presences={@streams.presences} />
           </div>
         </div>
       </div>
@@ -116,6 +139,21 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
           </li>
         </ul>
       </.async_result>
+    </section>
+    """
+  end
+
+  attr :presences, :list, required: true
+  def raffle_watchers(assigns) do
+    ~H"""
+    <section>
+      <h4>Who's here</h4>
+      <ul class="presneces" id="raffle-watchers" phx-update="stream">
+        <li :for={{dom_id, %{id: username, metas: metas}} <- @presences} id={dom_id}>
+          <.icon name="hero-user-circle-solid" class="w-5 h-5" />
+          {username} ({length(metas)})
+        </li>
+      </ul>
     </section>
     """
   end
@@ -184,5 +222,17 @@ defmodule PhoenixRaffleyWeb.RaffleLive.Show do
 
   def handle_info({:raffle_updated, raffle}, socket) do
      {:noreply, assign(socket, raffle: raffle)}
+  end
+
+  def handle_info({:user_joined, presence}, socket) do
+     {:noreply, stream_insert(socket, :presences, presence)}
+  end
+
+  def handle_info({:user_left, presence}, socket) do
+    if presence.metas == [] do
+      {:noreply, stream_delete(socket, :presences, presence)}
+      else
+      {:noreply, stream_insert(socket, :presences, presence)}
+    end
   end
 end

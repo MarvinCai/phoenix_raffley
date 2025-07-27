@@ -12,6 +12,7 @@ defmodule PhoenixRaffley.Application do
       PhoenixRaffley.Repo,
       {DNSCluster, query: Application.get_env(:phoenix_raffley, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: PhoenixRaffley.PubSub},
+      PhoenixRaffleyWeb.Presence,
       # Start the Finch HTTP client for sending emails
       {Finch, name: PhoenixRaffley.Finch},
       # Start a worker by calling: PhoenixRaffley.Worker.start_link(arg)
